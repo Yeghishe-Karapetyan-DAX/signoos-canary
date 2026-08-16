@@ -1,0 +1,13 @@
+# Pinned, because the install phase is the Q28 probe: the point is to prove that
+# `pip install -r requirements.txt` succeeds inside the container's /opt/venv
+# under uid 1001 (see infra/canary/README.md and ADR-0041's second 2026-08-15
+# correction). Two small, real dependencies:
+#
+#   requests — a genuine wheel with its own transitive deps, so a successful
+#              install is evidence the venv resolves and downloads over the
+#              container's open egress, not just that pip ran.
+#   pytest   — declared here so the container's declared TEST command runs a real
+#              suite (test_canary.py). Its presence also means a repo WITHOUT a
+#              signoos.yml would still be detected as a pytest project.
+requests==2.32.3
+pytest==8.3.2

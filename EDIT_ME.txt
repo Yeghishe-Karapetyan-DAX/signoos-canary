@@ -1,0 +1,10 @@
+canary-build: 1
+
+# This file exists so the delegated task has something trivial to change.
+#
+# `run_checks` only fires INSIDE the automatic solver loop, and only AFTER the
+# solver has edited at least one file (backend/functions/src/pipeline/taskSolve.js:
+# toolRunChecks refuses with `nothing_edited` when state.touched is empty). So to
+# make the sandbox actually run the probes, delegate a task whose objective forces
+# one small edit here — e.g. "In EDIT_ME.txt, change `canary-build: 1` to
+# `canary-build: 2`." — and let the solver run. See infra/canary/README.md.

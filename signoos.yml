@@ -1,0 +1,31 @@
+# What Signoos may run when it tests a patch. Nothing else is ever executed.
+#
+# This file is the canary's CONTROL SURFACE, and it is a real Signoos mechanism,
+# not a probe-only invention. `backend/functions/src/services/projectCommands.js`
+# (`resolve`) reads commands from three sources, highest authority first:
+#
+#   1. stored     — what a team leader confirmed in the AI Console
+#                   (project.sandbox.commands). If this is set, it WINS over
+#                   this file. So when you run the canary, do NOT save any
+#                   commands in the AI Console — see infra/canary/README.md.
+#   2. signoos.yml — THIS FILE. With no stored commands, it wins over detection.
+#   3. detected   — read live from the repo's own manifests (package.json
+#                   scripts, requirements.txt, pyproject.toml, pytest.ini).
+#
+# `parseConfig` (backend/functions/src/services/sandbox.js) accepts exactly four
+# keys, caps each value at 300 characters, and strips control characters — which
+# is why every probe is a one-line `sh` call into probes/ rather than an inline
+# script. Each command runs from /workspace (the repo root) as the unprivileged
+# `runner` account (uid 1001), through `/bin/sh -c`, under `ulimit -u 512` and a
+# 1 GiB per-file ceiling (sandbox/index.js LIMITS_PREFIX).
+#
+# The container runs these four phases in THIS fixed order — install, lint,
+# build, test — and ONLY a failed install stops the run (sandbox/index.js:512).
+# The probes are arranged accordingly: the one phase that must succeed for the
+# rest to run (install: the Q28 virtualenv pip install) is first; the purely
+# observational probes, which must never abort the run when they see an expected
+# refusal, sit in lint/build/test where a non-zero exit does not stop the loop.
+install: sh probes/install.sh
+lint: sh probes/identity.sh
+build: sh probes/network.sh
+test: sh probes/verify.sh
