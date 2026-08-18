@@ -11,4 +11,4 @@
 
 
 def test_canary_runs():
-    assert 1 + 1 == 2
+    assert 1 + 3 == 4
