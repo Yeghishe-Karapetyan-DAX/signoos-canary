@@ -2,22 +2,99 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './yk.css';
 
 const PLANETS = [
-  { name: 'Mercury', className: 'yk-planet--mercury', orbitClassName: 'yk-orbit--mercury', sizeClassName: 'yk-size--mercury', periodDays: 88, distanceAu: 0.39, radiusKm: 2440 },
-  { name: 'Venus', className: 'yk-planet--venus', orbitClassName: 'yk-orbit--venus', sizeClassName: 'yk-size--venus', periodDays: 224.7, distanceAu: 0.72, radiusKm: 6052 },
-  { name: 'Earth', className: 'yk-planet--earth', orbitClassName: 'yk-orbit--earth', sizeClassName: 'yk-size--earth', periodDays: 365.25, distanceAu: 1.0, radiusKm: 6371 },
-  { name: 'Mars', className: 'yk-planet--mars', orbitClassName: 'yk-orbit--mars', sizeClassName: 'yk-size--mars', periodDays: 687, distanceAu: 1.52, radiusKm: 3390 },
-  { name: 'Jupiter', className: 'yk-planet--jupiter', orbitClassName: 'yk-orbit--jupiter', sizeClassName: 'yk-size--jupiter', periodDays: 4332.59, distanceAu: 5.2, radiusKm: 69911 },
-  { name: 'Saturn', className: 'yk-planet--saturn', orbitClassName: 'yk-orbit--saturn', sizeClassName: 'yk-size--saturn', periodDays: 10759, distanceAu: 9.58, radiusKm: 58232 },
-  { name: 'Uranus', className: 'yk-planet--uranus', orbitClassName: 'yk-orbit--uranus', sizeClassName: 'yk-size--uranus', periodDays: 30688.5, distanceAu: 19.2, radiusKm: 25362 },
-  { name: 'Neptune', className: 'yk-planet--neptune', orbitClassName: 'yk-orbit--neptune', sizeClassName: 'yk-size--neptune', periodDays: 60182, distanceAu: 30.1, radiusKm: 24622 },
+  {
+    name: 'Mercury',
+    className: 'yk-planet--mercury',
+    orbitClassName: 'yk-orbit--mercury',
+    sizeClassName: 'yk-size--mercury',
+    periodDays: 87.97,
+    distanceAu: 0.39,
+    radiusKm: 2440,
+    tiltDeg: 0.03,
+  },
+  {
+    name: 'Venus',
+    className: 'yk-planet--venus',
+    orbitClassName: 'yk-orbit--venus',
+    sizeClassName: 'yk-size--venus',
+    periodDays: 224.7,
+    distanceAu: 0.72,
+    radiusKm: 6052,
+    tiltDeg: 177.4,
+  },
+  {
+    name: 'Earth',
+    className: 'yk-planet--earth',
+    orbitClassName: 'yk-orbit--earth',
+    sizeClassName: 'yk-size--earth',
+    periodDays: 365.25,
+    distanceAu: 1,
+    radiusKm: 6371,
+    tiltDeg: 23.44,
+  },
+  {
+    name: 'Mars',
+    className: 'yk-planet--mars',
+    orbitClassName: 'yk-orbit--mars',
+    sizeClassName: 'yk-size--mars',
+    periodDays: 686.98,
+    distanceAu: 1.52,
+    radiusKm: 3390,
+    tiltDeg: 25.19,
+  },
+  {
+    name: 'Jupiter',
+    className: 'yk-planet--jupiter',
+    orbitClassName: 'yk-orbit--jupiter',
+    sizeClassName: 'yk-size--jupiter',
+    periodDays: 4332.59,
+    distanceAu: 5.2,
+    radiusKm: 69911,
+    tiltDeg: 3.13,
+  },
+  {
+    name: 'Saturn',
+    className: 'yk-planet--saturn',
+    orbitClassName: 'yk-orbit--saturn',
+    sizeClassName: 'yk-size--saturn',
+    periodDays: 10759,
+    distanceAu: 9.58,
+    radiusKm: 58232,
+    tiltDeg: 26.73,
+  },
+  {
+    name: 'Uranus',
+    className: 'yk-planet--uranus',
+    orbitClassName: 'yk-orbit--uranus',
+    sizeClassName: 'yk-size--uranus',
+    periodDays: 30688.5,
+    distanceAu: 19.2,
+    radiusKm: 25362,
+    tiltDeg: 97.77,
+  },
+  {
+    name: 'Neptune',
+    className: 'yk-planet--neptune',
+    orbitClassName: 'yk-orbit--neptune',
+    sizeClassName: 'yk-size--neptune',
+    periodDays: 60182,
+    distanceAu: 30.1,
+    radiusKm: 24622,
+    tiltDeg: 28.32,
+  },
 ];
 
 const ORBIT_SCALES = [0.16, 0.23, 0.3, 0.38, 0.53, 0.68, 0.83, 0.98];
 const DEFAULT_ROTATION = { x: -18, y: -28 };
 const DEFAULT_ZOOM = 1;
+const BASE_PERIOD = 87.97;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function formatDuration(periodDays) {
+  return `${Math.max(periodDays / 18, 5)}s`;
 }
 
 export default function YK() {
@@ -27,7 +104,7 @@ export default function YK() {
   const dragRef = useRef(null);
   const lastPinchDistance = useRef(null);
 
-  const rotateStyle = useMemo(
+  const sceneStyle = useMemo(
     () => ({
       '--yk-rotate-x': `${rotation.x}deg`,
       '--yk-rotate-y': `${rotation.y}deg`,
@@ -105,7 +182,7 @@ export default function YK() {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={rotateStyle}
+        style={sceneStyle}
       >
         <div className="yk-sky" aria-hidden="true" />
         <div className="yk-vignette" aria-hidden="true" />
@@ -116,25 +193,34 @@ export default function YK() {
             <div className="yk-orbital-light yk-orbital-light--secondary" aria-hidden="true" />
 
             <div className="yk-sun-shell" aria-hidden="true">
-              <div className="yk-sun" />
+              <div className="yk-sun">
+                <span className="yk-sun-core" />
+                <span className="yk-sun-glow" />
+              </div>
             </div>
 
             <div className="yk-orbit-stack" aria-hidden="true">
               {PLANETS.map((planet, index) => {
-                const duration = Math.max(planet.periodDays / 20, 6);
+                const orbitScale = ORBIT_SCALES[index];
+                const revolution = formatDuration(planet.periodDays / BASE_PERIOD * 10);
                 return (
                   <div
                     key={planet.name}
                     className={`yk-orbit ${planet.orbitClassName}`}
-                    style={{ '--yk-orbit-scale': ORBIT_SCALES[index], animationDuration: `${duration}s` }}
+                    style={{ '--yk-orbit-scale': orbitScale, animationDuration: revolution }}
                   >
                     <div
                       className={`yk-planet-shell ${planet.className}`}
-                      style={{ animationDuration: `${duration}s` }}
+                      style={{ animationDuration: revolution }}
                     >
-                      <div className={`yk-planet ${planet.sizeClassName} ${planet.name === 'Saturn' ? 'yk-ringed' : ''}`}>
+                      <div
+                        className={`yk-planet ${planet.sizeClassName} ${planet.name === 'Saturn' ? 'yk-ringed' : ''}`}
+                        style={{ '--yk-tilt': `${planet.tiltDeg}deg` }}
+                      >
+                        {planet.name === 'Earth' ? <span className="yk-planet-moon" aria-hidden="true" /> : null}
+                        {planet.name === 'Saturn' ? <span className="yk-planet-rings" aria-hidden="true" /> : null}
                         <span className="yk-planet-label">{planet.name}</span>
-                        <span className="yk-planet-meta">{planet.distanceAu} AU</span>
+                        <span className="yk-planet-meta">{planet.distanceAu} AU · {planet.radiusKm.toLocaleString()} km</span>
                       </div>
                     </div>
                   </div>
