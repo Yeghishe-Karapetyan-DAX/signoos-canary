@@ -187,6 +187,27 @@ body {
   box-shadow: 0 0 18px rgba(255, 245, 220, 0.08);
 }
 
+.yk-moon {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e6ebf6 0 25%, #a7afc1 58%, #6d7486 100%);
+  box-shadow: inset -3px -5px 10px rgba(0, 0, 0, 0.3);
+}
+
+.yk-label {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 12px);
+  transform: translateX(-50%) translateZ(0);
+  white-space: nowrap;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+}
+
 .yk-hud {
   position: absolute;
   left: clamp(18px, 3vw, 34px);
